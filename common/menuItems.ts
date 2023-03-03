@@ -10,10 +10,10 @@ export const menuItems: MenuItems[] = [
   },
   {
     name: "Список треков",
-    path: "tracks",
+    path: "/tracks",
   },
   {
     name: "Список альбомов",
-    path: "albums",
+    path: "/albums",
   },
 ];

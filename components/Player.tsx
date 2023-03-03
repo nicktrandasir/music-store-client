@@ -1,48 +1,25 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
 import styles from "../styles/Player.module.scss";
 import { Grid, IconButton } from "@mui/material";
-import { Pause, PlayArrow, VolumeDown, VolumeMute, VolumeUp } from "@mui/icons-material";
+import { Pause, PlayArrow, VolumeMute, VolumeUp } from "@mui/icons-material";
 import { TrackProgress } from "./TrackProgress";
 import { DataContext } from "../core/dataProvider";
+import { formatTime } from "../common/formatTime";
 
 let audio: HTMLAudioElement;
 
 export const Player = () => {
   const { data, setData } = useContext(DataContext);
-
-  const active = {
-    _id: "3",
-    name: "Трек 3",
-    artist: "Исполнитель 3",
-    text: "Просто текст",
-    listens: 3,
-    audio: "https://assets.mixkit.co/active_storage/sfx/2393/2393-preview.mp3",
-    picture: "ывыыы",
-    comments: [{ _id: "sdsd", username: "Ivan", text: "Comment" }],
-  };
-
-  useEffect(() => {
-    setData({ duration: 0, active: { ...active }, volume: 50, currentTime: 0, pause: true });
-  }, []);
-
-  useEffect(() => {
-    if (!audio) {
-      audio = new Audio(active.audio);
-      audio.onloadedmetadata = () => {
-        setData({ ...data, duration: audio.duration });
-      };
-      audio.ontimeupdate = () => {
-        setData({ ...data, currentTime: audio.currentTime });
-      };
-    }
-  }, []);
+  const [playTrack, setPlayTrack] = useState(data?.pause);
 
   const play = () => {
     if (data?.pause) {
       audio.play();
+      setPlayTrack(true);
       setData({ ...data, pause: false });
     } else {
       audio.pause();
+      setPlayTrack(false);
       setData({ ...data, pause: true });
     }
   };
@@ -55,17 +32,29 @@ export const Player = () => {
     audio.currentTime = Number(e.target.value);
     setData({ ...data, currentTime: Number(e.target.value) });
   };
-  console.log("audio---->", Math.ceil(audio?.duration));
+  useLayoutEffect(() => {
+    if (!audio && data?.active) {
+      audio = new Audio();
+      audio.src = "http://localhost:5000/" + data?.active?.audio;
+      audio.onloadedmetadata = () => {
+        setData({ ...data, duration: audio.duration });
+      };
+      audio.ontimeupdate = () => {
+        setData({ ...data, currentTime: audio.currentTime });
+      };
+    }
+  }, [data]);
+
   return (
     <div className={styles.player}>
-      <IconButton onClick={play}>{data?.pause ? <PlayArrow /> : <Pause />}</IconButton>
+      <IconButton onClick={play}>{!playTrack ? <PlayArrow /> : <Pause />}</IconButton>
       <Grid container direction="column" style={{ width: 200, margin: "0 20px" }}>
-        <div>{active?.name}</div>
-        <div style={{ fontSize: 12, color: "gray" }}>{active?.artist}</div>
+        <div>{data?.active?.name}</div>
+        <div style={{ fontSize: 12, color: "gray" }}>{data?.active?.artist}</div>
       </Grid>
       <TrackProgress
-        left={Math.ceil(data?.currentTime)}
-        right={Math.ceil(data?.duration)}
+        left={formatTime(Math.ceil(data?.currentTime))}
+        right={formatTime(Math.ceil(data?.duration))}
         onChange={changeCurrentTime}
       />
       {data?.volume === 0 ? (

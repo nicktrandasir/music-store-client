@@ -51,9 +51,16 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
   justifyContent: "flex-end",
 }));
+const pageNames = {
+  "/": "Главная страница",
+  "/tracks": "Список треков",
+  "/tracks/create": "Загрузка трека",
+  "/albums": "Альбомы",
+  // "/tracks/:id" = "Обзор трека",
+};
 
 export default function Navbar() {
-  const { push } = useRouter();
+  const { push, pathname } = useRouter();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
@@ -64,11 +71,10 @@ export default function Navbar() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
-
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed" open={open} style={{ background: "lightblue", color: "black" }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -80,7 +86,8 @@ export default function Navbar() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Главная страница
+            {/*TODO: переделать*/}
+            {pageNames[pathname]}
           </Typography>
         </Toolbar>
       </AppBar>
